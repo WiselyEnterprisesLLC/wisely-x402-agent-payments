@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wiselyenterprisesllc.com/schemas/payment-requirement.schema.json",
+  "title": "Wisely x402 Payment Requirement",
+  "type": "object",
+  "required": ["resource", "method", "amount", "asset", "network", "payTo", "nonce", "expiresAt"],
+  "properties": {
+    "resource": { "type": "string", "format": "uri" },
+    "method": { "type": "string" },
+    "payloadHash": { "type": "string" },
+    "amount": { "type": "string" },
+    "asset": { "type": "string" },
+    "network": { "type": "string" },
+    "payTo": { "type": "string" },
+    "nonce": { "type": "string" },
+    "expiresAt": { "type": "string", "format": "date-time" },
+    "idempotencyKey": { "type": "string" }
+  },
+  "additionalProperties": true
+}

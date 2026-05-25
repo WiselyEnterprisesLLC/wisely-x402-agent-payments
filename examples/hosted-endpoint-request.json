@@ -1,0 +1,19 @@
+{
+  "name": "sentiment",
+  "description": "Return a sentiment score and confidence for a stock ticker or short text input.",
+  "method": "POST",
+  "path": "/tools/sentiment",
+  "price": {
+    "mode": "fixed",
+    "amountUsd": "0.005"
+  },
+  "inputSchema": {
+    "type": "object",
+    "required": ["text"],
+    "properties": {
+      "text": {
+        "type": "string"
+      }
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wiselyenterprisesllc.com/schemas/receipt.schema.json",
+  "title": "Wisely Paid Agent Call Receipt",
+  "type": "object",
+  "required": ["receiptId", "status", "resource", "rail", "createdAt"],
+  "properties": {
+    "receiptId": { "type": "string" },
+    "status": { "type": "string" },
+    "resource": { "type": "string" },
+    "method": { "type": "string" },
+    "rail": { "type": "string" },
+    "asset": { "type": "string" },
+    "amount": { "type": "string" },
+    "payTo": { "type": "string" },
+    "nonce": { "type": "string" },
+    "transactionHash": { "type": "string" },
+    "signature": { "type": "string" },
+    "payloadHash": { "type": "string" },
+    "resultHash": { "type": "string" },
+    "reconciliationStatus": { "type": "string" },
+    "createdAt": { "type": "string", "format": "date-time" }
+  },
+  "additionalProperties": true
+}

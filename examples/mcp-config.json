@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "wisely-x402": {
+      "type": "http",
+      "url": "https://payments.wiselyenterprisesllc.com/ai/mcp"
+    }
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "name": "x402-agent-payment-infrastructure",
+  "version": "2.0.0",
+  "description": "Portable client, skill, schemas, and examples for Wisely x402 agent-payment infrastructure.",
+  "type": "module",
+  "bin": {
+    "wisely-x402": "./client.mjs"
+  },
+  "files": [
+    "SKILL.md",
+    "README.md",
+    "client.mjs",
+    "docs",
+    "examples",
+    "schemas",
+    "tests"
+  ],
+  "scripts": {
+    "test": "node tests/smoke.mjs",
+    "smoke": "node tests/smoke.mjs",
+    "doctor": "node client.mjs doctor"
+  },
+  "keywords": [
+    "x402",
+    "mcp",
+    "agent-payments",
+    "hosted-endpoints",
+    "ai-agents",
+    "usdc",
+    "base",
+    "solana",
+    "xrpl",
+    "stellar",
+    "receipts",
+    "crypto-payments"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/WiselyEnterprisesLLC/wisely-x402-agent-payments.git"
+  },
+  "homepage": "https://wiselyenterprisesllc.com/guides/x402-agent-payment-infrastructure/",
+  "bugs": {
+    "url": "https://github.com/WiselyEnterprisesLLC/wisely-x402-agent-payments/issues"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  }
+}
