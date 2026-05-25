@@ -1,6 +1,6 @@
 {
   "name": "x402-agent-payment-infrastructure",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Portable client, skill, schemas, and examples for Wisely x402 agent-payment infrastructure.",
   "type": "module",
   "bin": {

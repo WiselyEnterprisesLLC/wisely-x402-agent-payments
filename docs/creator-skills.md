@@ -44,6 +44,12 @@ The expected first response is `402 Payment Required`, not a failed call. A buye
 
 ## Creator Onboarding Flow
 
+Browser wizard:
+
+```text
+https://wiselyenterprisesllc.com/creator-onboarding/
+```
+
 Creators can import Markdown, CSV, JSON, or direct item arrays into a preview before anything is published:
 
 ```bash
@@ -58,6 +64,8 @@ wisely-x402 creator publish ./my-course-outline.md my-course
 ```
 
 Publishing creates or updates the creator catalog. If paid actions are included, Wisely can create matching `/tools/{slug}` paid endpoints so subscriber agents can probe for HTTP 402, ask the user, pay, invoke, and save receipts.
+
+For video, PDF, Notion, Kajabi, Teachable, Discord, and membership/community sources, start with approved exports, transcripts, public links, or pasted text. The wizard does not ask for platform passwords, Discord tokens, raw API keys, or admin credentials.
 
 Minimal Markdown import:
 

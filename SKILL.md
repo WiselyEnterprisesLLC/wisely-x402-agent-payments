@@ -1,8 +1,8 @@
 ---
 name: x402-agent-payment-infrastructure
-version: 2.1.0
+version: 2.1.1
 title: Wisely x402 Agent-Payment Infrastructure
-description: Self-facilitated x402 payment infrastructure for AI agents: quote, pay, invoke, stream progress, receive receipts, create hosted paid endpoints, and route across Base, Solana, XRPL, and Stellar without exposing keys.
+description: "Self-facilitated x402 payment infrastructure for AI agents: quote, pay, invoke, stream progress, receive receipts, create hosted paid endpoints, and route across Base, Solana, XRPL, and Stellar without exposing keys."
 author: Wisely Enterprises LLC
 license: MIT
 homepage: https://wiselyenterprisesllc.com
@@ -211,6 +211,12 @@ wisely-x402 payouts create-packet my-endpoint 30d
 
 Creator catalogs turn approved lessons, worksheets, clips, templates, and paid actions into agent-callable inventory.
 
+Browser wizard:
+
+```text
+https://wiselyenterprisesllc.com/creator-onboarding/
+```
+
 Use this flow:
 
 1. Preview import from Markdown, CSV, JSON, or item arrays.
@@ -230,6 +236,8 @@ wisely-x402 creator recommend my-course "I need help applying lesson 2 to my bus
 ```
 
 Do not publish private student data, private community posts, passwords, API keys, or content the creator does not have rights to distribute.
+
+For video, PDF, Notion, Kajabi, Teachable, Discord, memberships, or community sources, start with approved exports, transcripts, links, or pasted text. Do not ask for platform admin passwords, Discord tokens, raw API keys, or hidden member data.
 
 ## External x402 Seller Flow
 

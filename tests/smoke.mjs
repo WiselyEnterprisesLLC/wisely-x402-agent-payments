@@ -1,5 +1,53 @@
 #!/usr/bin/env node
 
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+
+function parseSkillFrontmatter(filePath) {
+  const text = fs.readFileSync(filePath, "utf8");
+  const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  if (!match) throw new Error("SKILL.md is missing YAML frontmatter");
+  const meta = {};
+  let currentList = null;
+  for (const rawLine of match[1].split(/\r?\n/)) {
+    const line = rawLine.trimEnd();
+    if (!line.trim() || line.trimStart().startsWith("#")) continue;
+    const listItem = line.match(/^\s+-\s+(.+)$/);
+    if (listItem && currentList) {
+      meta[currentList].push(listItem[1].trim());
+      continue;
+    }
+    currentList = null;
+    const scalar = line.match(/^([A-Za-z0-9_-]+):(?:\s*(.*))?$/);
+    if (!scalar) throw new Error(`Invalid SKILL.md frontmatter line: ${line}`);
+    const key = scalar[1];
+    const value = (scalar[2] || "").trim();
+    if (!value) {
+      meta[key] = [];
+      currentList = key;
+      continue;
+    }
+    if (value.includes(": ") && !/^["'|>]/.test(value)) {
+      throw new Error(`Frontmatter value for ${key} contains an unquoted colon`);
+    }
+    meta[key] = value.replace(/^"(.*)"$/, "$1").replace(/^'(.*)'$/, "$1");
+  }
+  for (const required of ["name", "version", "title", "description"]) {
+    if (!meta[required]) throw new Error(`SKILL.md frontmatter missing ${required}`);
+  }
+  return meta;
+}
+
+const packageJson = JSON.parse(fs.readFileSync(path.join(repoRoot, "package.json"), "utf8"));
+const skillMeta = parseSkillFrontmatter(path.join(repoRoot, "SKILL.md"));
+if (String(skillMeta.version) !== String(packageJson.version)) {
+  throw new Error(`Version mismatch: SKILL.md ${skillMeta.version} != package.json ${packageJson.version}`);
+}
+console.log(`ok skill-frontmatter ${skillMeta.version}`);
+
 const urls = [
   "https://wiselyenterprisesllc.com/",
   "https://wiselyenterprisesllc.com/guides/x402-agent-payment-infrastructure/",
