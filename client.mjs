@@ -345,6 +345,32 @@ export async function listEndpoints() {
   return requestJson("GET", `${aiBaseUrl}/endpoints`);
 }
 
+export async function listCreatorCatalogs() {
+  return requestJson("GET", `${aiBaseUrl}/creator-catalogs`);
+}
+
+export async function creatorCatalogInstall(creatorId = "demo-sales-framework") {
+  return requestJson("GET", `${aiBaseUrl}/creator-catalogs/${encodeURIComponent(creatorId)}/install`);
+}
+
+export async function searchCreatorCatalog({ creatorId = "demo-sales-framework", query = "", limit = 5, tags = [] } = {}) {
+  return requestJson("POST", `${aiBaseUrl}/creator-catalogs/${encodeURIComponent(creatorId)}/search`, { query, limit, tags });
+}
+
+export async function recommendCreatorCatalog({ creatorId = "demo-sales-framework", situation = "", goal = "", audience = "", constraints = [], entitlement = "" } = {}) {
+  return requestJson("POST", `${aiBaseUrl}/creator-catalogs/${encodeURIComponent(creatorId)}/recommend`, {
+    situation,
+    goal,
+    audience,
+    constraints,
+    entitlement,
+  });
+}
+
+export async function fetchCreatorCatalogItem({ creatorId = "demo-sales-framework", itemId = "" } = {}) {
+  return requestJson("POST", `${aiBaseUrl}/creator-catalogs/${encodeURIComponent(creatorId)}/fetch`, { itemId });
+}
+
 export async function endpointInfo(slug) {
   return requestJson("GET", `${aiBaseUrl}/endpoints/${encodeURIComponent(slug)}`);
 }
@@ -435,6 +461,13 @@ Builder/account:
   node client.mjs builder status
   node client.mjs builder revenue [endpointSlug] [range]
   node client.mjs builder events [endpointSlug] [range] [type]
+
+Creator catalogs:
+  node client.mjs creator catalogs
+  node client.mjs creator install [creatorId]
+  node client.mjs creator search [creatorId] [query]
+  node client.mjs creator recommend [creatorId] [situation]
+  node client.mjs creator fetch [creatorId] <itemId>
 
 Endpoints:
   node client.mjs endpoints list
@@ -571,6 +604,16 @@ async function main() {
   if (cmd === "builder" && sub === "status") return console.log(compact(await builderStatus()));
   if (cmd === "builder" && sub === "revenue") return console.log(compact(await builderRevenue({ endpointSlug: a || "", since: b || "30d" })));
   if (cmd === "builder" && sub === "events") return console.log(compact(await builderEvents({ endpointSlug: a || "", since: b || "7d", type: c || "" })));
+  if (cmd === "creator" && sub === "catalogs") return console.log(compact(await listCreatorCatalogs()));
+  if (cmd === "creator" && sub === "install") return console.log(compact(await creatorCatalogInstall(a || "demo-sales-framework")));
+  if (cmd === "creator" && sub === "search") return console.log(compact(await searchCreatorCatalog({ creatorId: a || "demo-sales-framework", query: b || "personalized plan" })));
+  if (cmd === "creator" && sub === "recommend") return console.log(compact(await recommendCreatorCatalog({
+    creatorId: a || "demo-sales-framework",
+    situation: b || "I need a practical plan this week",
+    goal: c || "",
+    audience: d || "",
+  })));
+  if (cmd === "creator" && sub === "fetch") return console.log(compact(await fetchCreatorCatalogItem({ creatorId: a || "demo-sales-framework", itemId: b || "" })));
   if (cmd === "endpoints" && sub === "list") return console.log(compact(await listEndpoints()));
   if (cmd === "endpoints" && sub === "info") return console.log(compact(await endpointInfo(a)));
   if (cmd === "endpoints" && sub === "create") return console.log(compact(await createEndpoint(readJsonFile(a))));

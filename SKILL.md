@@ -1,6 +1,6 @@
 ---
 name: x402-agent-payment-infrastructure
-version: 2.0.0
+version: 2.0.1
 title: Wisely x402 Agent-Payment Infrastructure
 description: Self-facilitated x402 payment infrastructure for AI agents: quote, pay, invoke, stream progress, receive receipts, create hosted paid endpoints, and route across Base, Solana, XRPL, and Stellar without exposing keys.
 author: Wisely Enterprises LLC

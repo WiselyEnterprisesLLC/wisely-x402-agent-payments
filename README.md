@@ -72,6 +72,16 @@ Save receipts and proof.
 If you see a new x402 seller, use the external quote flow and explain the rail, asset, amount, expiry, and signing step.
 ```
 
+## Creator Catalog Quickstart
+
+```bash
+wisely-x402 creator catalogs
+wisely-x402 creator install demo-sales-framework
+wisely-x402 creator recommend demo-sales-framework "I need the best paid or free action for a new buyer conversation this week"
+```
+
+The recommendation tells the agent whether to fetch a free/subscriber catalog item or probe a paid endpoint for HTTP 402 payment requirements before asking the user to approve payment.
+
 ## Public Package Boundaries
 
 This repo intentionally includes:
