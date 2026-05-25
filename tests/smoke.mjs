@@ -51,6 +51,7 @@ console.log(`ok skill-frontmatter ${skillMeta.version}`);
 const urls = [
   "https://wiselyenterprisesllc.com/",
   "https://wiselyenterprisesllc.com/guides/x402-agent-payment-infrastructure/",
+  "https://wiselyenterprisesllc.com/creator-import-proof/",
   "https://payments.wiselyenterprisesllc.com/server.json",
   "https://payments.wiselyenterprisesllc.com/.well-known/x402.json",
   "https://payments.wiselyenterprisesllc.com/ai/manifest",
@@ -63,14 +64,14 @@ const urls = [
 
 const failures = [];
 for (const url of urls) {
-  const res = await fetch(url, { headers: { "user-agent": "wisely-x402-public-smoke/2.0" } });
+  const res = await fetch(url, { headers: { "user-agent": "wisely-x402-public-smoke/2.1.2" } });
   if (!res.ok) failures.push({ url, status: res.status });
   console.log(`${res.ok ? "ok" : "fail"} ${res.status} ${url}`);
 }
 
 const recommend = await fetch("https://payments.wiselyenterprisesllc.com/ai/creator-catalogs/demo-sales-framework/recommend", {
   method: "POST",
-  headers: { "content-type": "application/json", "user-agent": "wisely-x402-public-smoke/2.0" },
+  headers: { "content-type": "application/json", "user-agent": "wisely-x402-public-smoke/2.1.2" },
   body: JSON.stringify({
     situation: "I am testing the creator catalog flow and need a one-week buyer conversation plan.",
     goal: "pick the right free or paid creator action",
@@ -84,12 +85,12 @@ if (!recommend.ok || !recommendBody.includes("wisely.creator-catalog.recommend.v
 
 const preview = await fetch("https://payments.wiselyenterprisesllc.com/ai/creator-onboarding/preview", {
   method: "POST",
-  headers: { "content-type": "application/json", "user-agent": "wisely-x402-public-smoke/2.1" },
+  headers: { "content-type": "application/json", "user-agent": "wisely-x402-public-smoke/2.1.2" },
   body: JSON.stringify({
     creatorId: "smoke-preview",
     title: "Smoke Preview Creator",
-    contentType: "markdown",
-    content: "# Offer lesson\nWrite one specific buyer-facing offer.\n\n# Premium action plan\nPaid plan for the subscriber situation.",
+    contentType: "csv",
+    content: "title,summary,itemType,tags,entitlement,sourceRef,subscriberInputPrompt,priceUsd,paidActionSlug,approved\nOffer lesson,Write one specific buyer-facing offer,lesson,offer;free,free,smoke:offer,,0,,true\nPremium action plan,Paid plan for the subscriber situation,paid_tool,paid;planning,paid,smoke:paid,Send situation and constraints.,1,smoke-premium-action,true",
     paidActions: [{ title: "Personalized next action", priceUsd: 1 }],
   }),
 });

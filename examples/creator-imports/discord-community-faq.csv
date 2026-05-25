@@ -1,0 +1,4 @@
+title,summary,itemType,tags,entitlement,sourceRef,subscriberInputPrompt,priceUsd,paidActionSlug,approved
+FAQ: first setup question,Approved public FAQ answer for getting started,lesson,"discord;faq;free",free,discord:faq/first-setup,,0,,true
+Member-only troubleshooting notes,Approved member-only troubleshooting summary with no private names or messages,worksheet,"discord;troubleshooting;subscriber",subscriber,discord:member-faq/troubleshooting,,0,,true
+Personalized support triage,Turn the subscriber's issue into a ranked action plan and escalation checklist,paid_tool,"discord;paid;support",paid,discord:paid-actions/support-triage,"Send issue description, platform, error text, what changed, and urgency.",1.50,discord-support-triage,true

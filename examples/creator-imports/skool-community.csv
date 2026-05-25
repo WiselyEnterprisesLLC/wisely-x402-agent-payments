@@ -1,0 +1,4 @@
+title,summary,itemType,tags,entitlement,sourceRef,subscriberInputPrompt,priceUsd,paidActionSlug,approved
+Welcome module,Orientation and expected outcomes for the community,lesson,"orientation;community",free,skool:classroom/welcome,,0,,true
+Buyer objection worksheet,Subscriber worksheet for turning objections into follow-up questions,worksheet,"sales;worksheet;subscriber",subscriber,skool:classroom/buyer-objections,,0,,true
+Personalized weekly action plan,Create a one-week implementation plan from the subscriber situation,paid_tool,"paid;planning;coaching",paid,skool:premium/action-plan,"Send role, goal, current blocker, audience, available time, and preferred tone.",2.00,skool-weekly-action-plan,true

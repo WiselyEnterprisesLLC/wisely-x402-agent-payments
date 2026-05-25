@@ -1,6 +1,6 @@
 ---
 name: x402-agent-payment-infrastructure
-version: 2.1.1
+version: 2.1.2
 title: Wisely x402 Agent-Payment Infrastructure
 description: "Self-facilitated x402 payment infrastructure for AI agents: quote, pay, invoke, stream progress, receive receipts, create hosted paid endpoints, and route across Base, Solana, XRPL, and Stellar without exposing keys."
 author: Wisely Enterprises LLC
@@ -147,7 +147,7 @@ First, run a doctor/check against the public manifest and rail status. When I as
 ## CLI Quickstart
 
 ```bash
-npm install -g github:WiselyEnterprisesLLC/wisely-x402-agent-payments
+npm install -g github:WiselyEnterprisesLLC/wisely-x402-agent-payments#v2.1.2
 wisely-x402 doctor
 wisely-x402 rails status
 wisely-x402 proofs cache
@@ -238,6 +238,14 @@ wisely-x402 creator recommend my-course "I need help applying lesson 2 to my bus
 Do not publish private student data, private community posts, passwords, API keys, or content the creator does not have rights to distribute.
 
 For video, PDF, Notion, Kajabi, Teachable, Discord, memberships, or community sources, start with approved exports, transcripts, links, or pasted text. Do not ask for platform admin passwords, Discord tokens, raw API keys, or hidden member data.
+
+Import templates:
+
+```text
+examples/creator-imports/
+```
+
+The normalized template fields are `title`, `summary`, `itemType`, `tags`, `entitlement`, `sourceRef`, `subscriberInputPrompt`, `priceUsd`, `paidActionSlug`, and `approved`. Use `/creator-import-proof/` for the public proof walkthrough.
 
 ## External x402 Seller Flow
 

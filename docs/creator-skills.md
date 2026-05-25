@@ -42,6 +42,12 @@ curl -i https://payments.wiselyenterprisesllc.com/tools/creator-personalized-pla
 
 The expected first response is `402 Payment Required`, not a failed call. A buyer agent should show the price and payment route to the user, ask for approval, then retry with `X-PAYMENT` or use a saved developer-credit key.
 
+Public proof walkthrough:
+
+```text
+https://wiselyenterprisesllc.com/creator-import-proof/
+```
+
 ## Creator Onboarding Flow
 
 Browser wizard:
@@ -66,6 +72,12 @@ wisely-x402 creator publish ./my-course-outline.md my-course
 Publishing creates or updates the creator catalog. If paid actions are included, Wisely can create matching `/tools/{slug}` paid endpoints so subscriber agents can probe for HTTP 402, ask the user, pay, invoke, and save receipts.
 
 For video, PDF, Notion, Kajabi, Teachable, Discord, and membership/community sources, start with approved exports, transcripts, public links, or pasted text. The wizard does not ask for platform passwords, Discord tokens, raw API keys, or admin credentials.
+
+Use the files in `examples/creator-imports/` as starter exports for Skool/community, Kajabi, Teachable, Notion, and Discord/community sources. Every template uses the same normalized fields:
+
+```text
+title, summary, itemType, tags, entitlement, sourceRef, subscriberInputPrompt, priceUsd, paidActionSlug, approved
+```
 
 Minimal Markdown import:
 

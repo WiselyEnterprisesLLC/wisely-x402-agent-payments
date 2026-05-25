@@ -1,0 +1,4 @@
+title,summary,itemType,tags,entitlement,sourceRef,subscriberInputPrompt,priceUsd,paidActionSlug,approved
+Section 1 lecture summary,Teachable lecture summary for the first transformation step,lesson,"teachable;lecture;free",free,teachable:course/section-1/lecture-1,,0,,true
+Implementation worksheet,Subscriber-only worksheet that converts the lecture into a checklist,worksheet,"teachable;worksheet;subscriber",subscriber,teachable:course/section-1/worksheet,,0,,true
+Course-to-my-situation adapter,Adapt the creator framework to the subscriber's specific business or personal context,paid_tool,"teachable;paid;adapter",paid,teachable:paid-actions/framework-adapter,"Send situation, goal, constraints, what you have already tried, and preferred output format.",3.00,teachable-framework-adapter,true

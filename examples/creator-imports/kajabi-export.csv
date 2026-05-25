@@ -1,0 +1,4 @@
+title,summary,itemType,tags,entitlement,sourceRef,subscriberInputPrompt,priceUsd,paidActionSlug,approved
+Offer clarity lesson,Lesson summary from Kajabi module 1 on naming the exact buyer pain,lesson,"kajabi;offer;positioning",free,kajabi:course/offer-clarity,,0,,true
+Lead magnet checklist,Subscriber download checklist for packaging a useful first promise,checklist,"kajabi;download;subscriber",subscriber,kajabi:downloads/lead-magnet-checklist,,0,,true
+Upsell fit audit,Score whether the subscriber should offer a paid audit, pilot, or subscription,paid_tool,"kajabi;paid;audit",paid,kajabi:offers/upsell-fit,"Send audience, current offer, price, list size, and last three objections.",5.00,kajabi-upsell-fit-audit,true

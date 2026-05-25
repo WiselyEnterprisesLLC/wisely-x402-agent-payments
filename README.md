@@ -9,7 +9,7 @@ This repository is the public integration surface: docs, schemas, examples, CLI 
 ## Start Here
 
 ```bash
-npm install -g github:WiselyEnterprisesLLC/wisely-x402-agent-payments
+npm install -g github:WiselyEnterprisesLLC/wisely-x402-agent-payments#v2.1.2
 wisely-x402 doctor
 wisely-x402 rails status
 ```
@@ -89,6 +89,16 @@ The recommendation tells the agent whether to fetch a free/subscriber catalog it
 
 `creator preview` imports Markdown, CSV, JSON, or direct item arrays into a non-persistent draft. The browser wizard also handles video transcripts, PDF text, Notion/Kajabi/Teachable exports, and Discord/community exports as paste/upload workflows. `creator publish` uses a saved builder key to create the live catalog and optional paid `/tools/{slug}` actions.
 
+Template imports live in [`examples/creator-imports`](examples/creator-imports). They all normalize to:
+
+```text
+title, summary, itemType, tags, entitlement, sourceRef, subscriberInputPrompt, priceUsd, paidActionSlug, approved
+```
+
+Public proof page:
+
+https://wiselyenterprisesllc.com/creator-import-proof/
+
 ## Public Package Boundaries
 
 This repo intentionally includes:
@@ -125,6 +135,9 @@ This repo intentionally excludes:
 
 ```bash
 npm test
+npm run public-version-smoke
 ```
 
 The smoke test only checks public no-payment discovery paths. It does not send wallet signatures, spend money, or call private endpoints.
+
+`public-version-smoke` is the post-release check. It compares GitHub `main`, the current tag, live `server.json`, `SKILL.md` frontmatter, and the MCP install profile so stale default-branch views are caught quickly.
