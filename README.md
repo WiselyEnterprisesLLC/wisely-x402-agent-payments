@@ -78,9 +78,12 @@ If you see a new x402 seller, use the external quote flow and explain the rail, 
 wisely-x402 creator catalogs
 wisely-x402 creator install demo-sales-framework
 wisely-x402 creator recommend demo-sales-framework "I need the best paid or free action for a new buyer conversation this week"
+wisely-x402 creator preview ./my-course-outline.md my-course
 ```
 
 The recommendation tells the agent whether to fetch a free/subscriber catalog item or probe a paid endpoint for HTTP 402 payment requirements before asking the user to approve payment.
+
+`creator preview` imports Markdown, CSV, JSON, or direct item arrays into a non-persistent draft. `creator publish` uses a saved builder key to create the live catalog and optional paid `/tools/{slug}` actions.
 
 ## Public Package Boundaries
 

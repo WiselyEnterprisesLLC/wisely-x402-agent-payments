@@ -371,6 +371,33 @@ export async function fetchCreatorCatalogItem({ creatorId = "demo-sales-framewor
   return requestJson("POST", `${aiBaseUrl}/creator-catalogs/${encodeURIComponent(creatorId)}/fetch`, { itemId });
 }
 
+export async function creatorOnboardingInfo() {
+  return requestJson("GET", `${aiBaseUrl}/creator-onboarding`);
+}
+
+export async function previewCreatorOnboarding(body = {}) {
+  return requestJson("POST", `${aiBaseUrl}/creator-onboarding/preview`, body);
+}
+
+export async function publishCreatorOnboarding(body = {}) {
+  return requestJson("POST", `${aiBaseUrl}/creator-onboarding/publish`, body);
+}
+
+function readCreatorImportFile(file, options = {}) {
+  const resolved = path.resolve(file);
+  const content = fs.readFileSync(resolved, "utf8");
+  const ext = path.extname(resolved).toLowerCase();
+  const contentType = options.contentType || (ext === ".csv" ? "csv" : ext === ".json" ? "json" : "markdown");
+  return {
+    title: options.title || path.basename(resolved, ext).replace(/[-_]+/g, " "),
+    creatorId: options.creatorId || path.basename(resolved, ext).toLowerCase().replace(/[^a-z0-9-]+/g, "-"),
+    contentType,
+    content,
+    defaultEntitlement: options.defaultEntitlement || "free",
+    paidActions: options.paidActionTitle ? [{ title: options.paidActionTitle, priceUsd: Number(options.paidActionPriceUsd || 1) }] : [],
+  };
+}
+
 export async function endpointInfo(slug) {
   return requestJson("GET", `${aiBaseUrl}/endpoints/${encodeURIComponent(slug)}`);
 }
@@ -468,6 +495,9 @@ Creator catalogs:
   node client.mjs creator search [creatorId] [query]
   node client.mjs creator recommend [creatorId] [situation]
   node client.mjs creator fetch [creatorId] <itemId>
+  node client.mjs creator onboarding
+  node client.mjs creator preview <markdown|csv|json file> [creatorId]
+  node client.mjs creator publish <markdown|csv|json file> [creatorId]
 
 Endpoints:
   node client.mjs endpoints list
@@ -614,6 +644,9 @@ async function main() {
     audience: d || "",
   })));
   if (cmd === "creator" && sub === "fetch") return console.log(compact(await fetchCreatorCatalogItem({ creatorId: a || "demo-sales-framework", itemId: b || "" })));
+  if (cmd === "creator" && sub === "onboarding") return console.log(compact(await creatorOnboardingInfo()));
+  if (cmd === "creator" && sub === "preview") return console.log(compact(await previewCreatorOnboarding(readCreatorImportFile(a, { creatorId: b || "" }))));
+  if (cmd === "creator" && sub === "publish") return console.log(compact(await publishCreatorOnboarding(readCreatorImportFile(a, { creatorId: b || "" }))));
   if (cmd === "endpoints" && sub === "list") return console.log(compact(await listEndpoints()));
   if (cmd === "endpoints" && sub === "info") return console.log(compact(await endpointInfo(a)));
   if (cmd === "endpoints" && sub === "create") return console.log(compact(await createEndpoint(readJsonFile(a))));

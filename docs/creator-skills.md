@@ -42,6 +42,41 @@ curl -i https://payments.wiselyenterprisesllc.com/tools/creator-personalized-pla
 
 The expected first response is `402 Payment Required`, not a failed call. A buyer agent should show the price and payment route to the user, ask for approval, then retry with `X-PAYMENT` or use a saved developer-credit key.
 
+## Creator Onboarding Flow
+
+Creators can import Markdown, CSV, JSON, or direct item arrays into a preview before anything is published:
+
+```bash
+wisely-x402 creator onboarding
+wisely-x402 creator preview ./my-course-outline.md my-course
+```
+
+Preview is public-safe and does not persist content or create endpoints. Publish requires a saved `X-Builder-Key` or operator admin token:
+
+```bash
+wisely-x402 creator publish ./my-course-outline.md my-course
+```
+
+Publishing creates or updates the creator catalog. If paid actions are included, Wisely can create matching `/tools/{slug}` paid endpoints so subscriber agents can probe for HTTP 402, ask the user, pay, invoke, and save receipts.
+
+Minimal Markdown import:
+
+```markdown
+# First lesson title
+Approved lesson text or summary.
+
+# Premium action plan
+Paid planning workflow for a subscriber situation.
+```
+
+Minimal CSV columns:
+
+```csv
+title,summary,content,collection,tags,entitlement,type,priceUsd
+Write the offer,One-line offer lesson,Approved lesson text,Starter,"offer;sales",free,lesson,0
+Personalized plan,Premium action plan,,Premium,"paid;planning",paid,paid_tool,1
+```
+
 ## Example Paid Actions
 
 - Best lesson picker.
