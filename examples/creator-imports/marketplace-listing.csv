@@ -1,0 +1,4 @@
+title,summary,itemType,tags,entitlement,sourceRef,subscriberInputPrompt,priceUsd,paidActionSlug,approved
+Creator service catalog,Public list of available creator services and digital products,resource,"marketplace;catalog;public",free,marketplace:services,,0,,true
+Best-fit product picker,Free guidance for choosing the right product category,checklist,"marketplace;picker;free",free,marketplace:picker,,0,,true
+Personalized product shortlist,Paid action that picks the best service or digital product for the buyer,paid_tool,"marketplace;paid;shortlist",paid,marketplace:paid/shortlist,"Send buyer situation, budget, deadline, and desired outcome.",2,marketplace-product-shortlist,true

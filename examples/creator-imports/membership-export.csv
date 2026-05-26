@@ -1,0 +1,4 @@
+title,summary,itemType,tags,entitlement,sourceRef,subscriberInputPrompt,priceUsd,paidActionSlug,approved
+Weekly implementation vault,Subscriber-only vault index for weekly implementation lessons,lesson,"membership;vault;subscriber",subscriber,membership:vault/weeklies,,0,,true
+Beginner onboarding sequence,Free orientation that explains which lesson path to start with,lesson,"membership;onboarding;free",free,membership:onboarding/start,,0,,true
+Ask the vault concierge,Paid action that chooses the best vault lesson and creates a 3-step plan,paid_tool,"membership;paid;recommendation",paid,membership:paid/concierge,"Describe your situation, skill level, and deadline.",2,membership-vault-concierge,true

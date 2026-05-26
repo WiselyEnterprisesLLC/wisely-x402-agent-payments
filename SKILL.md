@@ -1,6 +1,6 @@
 ---
 name: x402-agent-payment-infrastructure
-version: 2.1.2
+version: 2.1.3
 title: Wisely x402 Agent-Payment Infrastructure
 description: "Self-facilitated x402 payment infrastructure for AI agents: quote, pay, invoke, stream progress, receive receipts, create hosted paid endpoints, and route across Base, Solana, XRPL, and Stellar without exposing keys."
 author: Wisely Enterprises LLC
@@ -48,6 +48,39 @@ It lets an agent:
 - stream plain-English progress for slow calls
 - save receipts, payment proof, and result proof
 - create and manage paid endpoints with a scoped builder key
+
+## Creator Import Lanes
+
+Use these lanes when a creator wants to turn existing material into an agent-readable catalog and paid actions. These are safe import lanes: exports, transcripts, pasted text, CSV, JSON, public links, or creator-approved summaries. Do not ask for platform passwords, Discord tokens, Kajabi admin keys, Notion workspace tokens, seed phrases, raw cards, or private member/student data.
+
+```bash
+wisely-x402 creator lanes
+wisely-x402 creator template kajabi_export
+wisely-x402 creator preview-lane notion_export examples/creator-imports/notion-playbook.md my-creator
+```
+
+Current lanes:
+
+- Markdown or pasted outline
+- Video transcript or lesson notes
+- PDF, workbook, or slide text
+- Notion export
+- Kajabi export
+- Teachable export
+- Skool/community classroom export
+- Discord/community FAQ export
+- Membership library export
+- Teams/cohort/internal training export
+- Affiliate or partner offer catalog
+- Revenue split/co-creator catalog metadata
+- Token-gated content rules
+- Marketplace search/listing catalog
+
+Every lane normalizes to:
+
+```text
+title, summary, itemType, tags, entitlement, sourceRef, subscriberInputPrompt, priceUsd, paidActionSlug, approved
+```
 
 ## Live Settlement Rails
 
@@ -147,7 +180,7 @@ First, run a doctor/check against the public manifest and rail status. When I as
 ## CLI Quickstart
 
 ```bash
-npm install -g github:WiselyEnterprisesLLC/wisely-x402-agent-payments#v2.1.2
+npm install -g github:WiselyEnterprisesLLC/wisely-x402-agent-payments#v2.1.3
 wisely-x402 doctor
 wisely-x402 rails status
 wisely-x402 proofs cache
@@ -237,7 +270,7 @@ wisely-x402 creator recommend my-course "I need help applying lesson 2 to my bus
 
 Do not publish private student data, private community posts, passwords, API keys, or content the creator does not have rights to distribute.
 
-For video, PDF, Notion, Kajabi, Teachable, Discord, memberships, or community sources, start with approved exports, transcripts, links, or pasted text. Do not ask for platform admin passwords, Discord tokens, raw API keys, or hidden member data.
+For video, PDF, Notion, Kajabi, Teachable, Skool, Discord, memberships, teams, affiliate, revenue split, token-gated, or marketplace sources, start with approved exports, transcripts, public links, CSV/JSON, or pasted text. Do not ask for platform admin passwords, Discord tokens, raw API keys, wallet recovery data, raw cards, or hidden member data.
 
 Import templates:
 

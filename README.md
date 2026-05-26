@@ -9,7 +9,7 @@ This repository is the public integration surface: docs, schemas, examples, CLI 
 ## Start Here
 
 ```bash
-npm install -g github:WiselyEnterprisesLLC/wisely-x402-agent-payments#v2.1.2
+npm install -g github:WiselyEnterprisesLLC/wisely-x402-agent-payments#v2.1.3
 wisely-x402 doctor
 wisely-x402 rails status
 ```
@@ -80,20 +80,25 @@ https://wiselyenterprisesllc.com/creator-onboarding/
 
 ```bash
 wisely-x402 creator catalogs
+wisely-x402 creator lanes
+wisely-x402 creator template kajabi_export
 wisely-x402 creator install demo-sales-framework
 wisely-x402 creator recommend demo-sales-framework "I need the best paid or free action for a new buyer conversation this week"
 wisely-x402 creator preview ./my-course-outline.md my-course
+wisely-x402 creator preview-lane notion_export examples/creator-imports/notion-playbook.md my-course
 ```
 
 The recommendation tells the agent whether to fetch a free/subscriber catalog item or probe a paid endpoint for HTTP 402 payment requirements before asking the user to approve payment.
 
-`creator preview` imports Markdown, CSV, JSON, or direct item arrays into a non-persistent draft. The browser wizard also handles video transcripts, PDF text, Notion/Kajabi/Teachable exports, and Discord/community exports as paste/upload workflows. `creator publish` uses a saved builder key to create the live catalog and optional paid `/tools/{slug}` actions.
+`creator preview` imports Markdown, CSV, JSON, or direct item arrays into a non-persistent draft. `creator preview-lane` and the browser wizard handle video transcripts, PDF text, Notion, Kajabi, Teachable, Skool/community, Discord, membership, teams/training, affiliate, revenue-split, token-gated, and marketplace exports as paste/upload workflows. `creator publish` uses a saved builder key to create the live catalog and optional paid `/tools/{slug}` actions.
 
-Template imports live in [`examples/creator-imports`](examples/creator-imports). They all normalize to:
+Template imports live in [`examples/creator-imports`](examples/creator-imports), with the lane registry in [`examples/creator-imports/creator-lanes.json`](examples/creator-imports/creator-lanes.json). They all normalize to:
 
 ```text
 title, summary, itemType, tags, entitlement, sourceRef, subscriberInputPrompt, priceUsd, paidActionSlug, approved
 ```
+
+Safety boundary: these lanes use exports, transcripts, pasted text, public links, or creator-approved summaries. They do not require Notion tokens, Discord bot tokens, Kajabi/Teachable passwords, platform admin credentials, raw cards, private keys, or private member/student data.
 
 Public proof page:
 
@@ -135,6 +140,7 @@ This repo intentionally excludes:
 
 ```bash
 npm test
+npm run creator-lanes-smoke
 npm run public-version-smoke
 ```
 

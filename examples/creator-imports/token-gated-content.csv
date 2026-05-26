@@ -1,0 +1,4 @@
+title,summary,itemType,tags,entitlement,sourceRef,subscriberInputPrompt,priceUsd,paidActionSlug,approved
+Holder resource index,Token-gated resource map for eligible wallet holders,resource,"token;holder;gated",subscriber,token:collection/resource-index,,0,,true
+Wallet eligibility explanation,Plain-English explanation of what the buyer must prove before access,checklist,"token;wallet;rules",free,token:rules/eligibility,,0,,true
+Holder action plan,Paid action for eligible holders who want a personalized implementation plan,paid_tool,"token;paid;action-plan",paid,token:paid/action-plan,"Send wallet eligibility proof status and your goal.",2,holder-action-plan,true

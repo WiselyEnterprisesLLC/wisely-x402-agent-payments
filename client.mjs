@@ -19,6 +19,8 @@ const aiBaseUrl = (
 ).replace(/\/$/, "");
 
 const builderKeyFile = process.env.WISELY_BUILDER_KEY_FILE || path.join(os.homedir(), ".wisely-x402", "builder-key");
+const packageRoot = path.dirname(fileURLToPath(import.meta.url));
+const creatorLanesPath = path.join(packageRoot, "examples", "creator-imports", "creator-lanes.json");
 
 function readStoredBuilderKey() {
   try {
@@ -80,6 +82,90 @@ async function requestJson(method, url, body, headers = {}) {
 
 function readJsonFile(file) {
   return JSON.parse(fs.readFileSync(path.resolve(file), "utf8"));
+}
+
+function readCreatorLanesRegistry() {
+  const registry = readJsonFile(creatorLanesPath);
+  const lanes = registry.lanes || [];
+  return {
+    ...registry,
+    lanes: lanes.map((lane) => ({
+      ...lane,
+      samplePath: path.join(packageRoot, "examples", "creator-imports", lane.sampleFile),
+      previewCommand: `wisely-x402 creator preview-lane ${lane.id} examples/creator-imports/${lane.sampleFile} my-creator`,
+      publishCommand: `wisely-x402 creator publish-lane ${lane.id} examples/creator-imports/${lane.sampleFile} my-creator`,
+    })),
+  };
+}
+
+function getCreatorLaneConfig(laneId = "") {
+  const registry = readCreatorLanesRegistry();
+  const wanted = String(laneId || "").trim().toLowerCase().replace(/[-\s]+/g, "_");
+  if (!wanted) return null;
+  return registry.lanes.find((lane) => {
+    const aliases = [lane.id, ...(lane.aliases || [])].map((item) => String(item).toLowerCase().replace(/[-\s]+/g, "_"));
+    return aliases.includes(wanted);
+  }) || null;
+}
+
+function inferCreatorLaneFromFile(file) {
+  const base = path.basename(file).toLowerCase();
+  const registry = readCreatorLanesRegistry();
+  return registry.lanes.find((lane) => {
+    if (base === lane.sampleFile.toLowerCase()) return true;
+    return [lane.id, ...(lane.aliases || [])].some((alias) => base.includes(String(alias).toLowerCase().replace(/_/g, "-")));
+  }) || null;
+}
+
+export function listCreatorLanes() {
+  const registry = readCreatorLanesRegistry();
+  return {
+    status: 200,
+    body: {
+      schema: registry.schema,
+      normalizedFields: registry.normalizedFields,
+      laneCount: registry.lanes.length,
+      lanes: registry.lanes.map((lane) => ({
+        id: lane.id,
+        label: lane.label,
+        status: lane.status,
+        contentType: lane.contentType,
+        defaultEntitlement: lane.defaultEntitlement,
+        sampleFile: lane.sampleFile,
+        acceptedInputs: lane.acceptedInputs,
+        doNotCollect: lane.doNotCollect,
+        previewCommand: lane.previewCommand,
+      })),
+    },
+  };
+}
+
+export function getCreatorLane(laneId) {
+  const lane = getCreatorLaneConfig(laneId);
+  if (!lane) throw new Error(`unknown_creator_lane:${laneId}`);
+  return { status: 200, body: lane };
+}
+
+export function creatorLaneTemplate(laneId) {
+  const lane = getCreatorLaneConfig(laneId);
+  if (!lane) throw new Error(`unknown_creator_lane:${laneId}`);
+  const content = fs.readFileSync(lane.samplePath, "utf8");
+  return {
+    status: 200,
+    body: {
+      lane: {
+        id: lane.id,
+        label: lane.label,
+        contentType: lane.contentType,
+        sampleFile: lane.sampleFile,
+        samplePath: lane.samplePath,
+      },
+      content,
+      previewCommand: lane.previewCommand,
+      publishCommand: lane.publishCommand,
+      safetyNote: "Use exported, pasted, or creator-approved content only. Do not collect platform passwords, private tokens, raw payment data, or member/student private data.",
+    },
+  };
 }
 
 export async function getManifest() {
@@ -383,17 +469,27 @@ export async function publishCreatorOnboarding(body = {}) {
   return requestJson("POST", `${aiBaseUrl}/creator-onboarding/publish`, body);
 }
 
-function readCreatorImportFile(file, options = {}) {
+export function readCreatorImportFile(file, options = {}) {
   const resolved = path.resolve(file);
   const content = fs.readFileSync(resolved, "utf8");
   const ext = path.extname(resolved).toLowerCase();
-  const contentType = options.contentType || (ext === ".csv" ? "csv" : ext === ".json" ? "json" : "markdown");
+  const lane = getCreatorLaneConfig(options.sourceLane || options.lane || "") || inferCreatorLaneFromFile(resolved);
+  const contentType = options.contentType || lane?.contentType || (ext === ".csv" ? "csv" : ext === ".json" ? "json" : "markdown");
+  const defaultEntitlement = options.defaultEntitlement || lane?.defaultEntitlement || "free";
   return {
     title: options.title || path.basename(resolved, ext).replace(/[-_]+/g, " "),
     creatorId: options.creatorId || path.basename(resolved, ext).toLowerCase().replace(/[^a-z0-9-]+/g, "-"),
     contentType,
     content,
-    defaultEntitlement: options.defaultEntitlement || "free",
+    sourceLane: lane?.id || options.sourceLane || "",
+    importSource: lane ? {
+      laneId: lane.id,
+      laneLabel: lane.label,
+      sampleFile: lane.sampleFile,
+      acceptedInputs: lane.acceptedInputs,
+    } : undefined,
+    defaultEntitlement,
+    safetyNote: "Creator import lanes accept exports, transcripts, pasted text, CSV, JSON, or direct approved items. They must not include platform passwords, private tokens, seed phrases, raw cards, or member/student private data.",
     paidActions: options.paidActionTitle ? [{ title: options.paidActionTitle, priceUsd: Number(options.paidActionPriceUsd || 1) }] : [],
   };
 }
@@ -491,6 +587,9 @@ Builder/account:
 
 Creator catalogs:
   node client.mjs creator catalogs
+  node client.mjs creator lanes
+  node client.mjs creator lane <laneId>
+  node client.mjs creator template <laneId>
   node client.mjs creator install [creatorId]
   node client.mjs creator search [creatorId] [query]
   node client.mjs creator recommend [creatorId] [situation]
@@ -498,6 +597,8 @@ Creator catalogs:
   node client.mjs creator onboarding
   node client.mjs creator preview <markdown|csv|json file> [creatorId]
   node client.mjs creator publish <markdown|csv|json file> [creatorId]
+  node client.mjs creator preview-lane <laneId> <file> [creatorId]
+  node client.mjs creator publish-lane <laneId> <file> [creatorId]
 
 Endpoints:
   node client.mjs endpoints list
@@ -635,6 +736,9 @@ async function main() {
   if (cmd === "builder" && sub === "revenue") return console.log(compact(await builderRevenue({ endpointSlug: a || "", since: b || "30d" })));
   if (cmd === "builder" && sub === "events") return console.log(compact(await builderEvents({ endpointSlug: a || "", since: b || "7d", type: c || "" })));
   if (cmd === "creator" && sub === "catalogs") return console.log(compact(await listCreatorCatalogs()));
+  if (cmd === "creator" && sub === "lanes") return console.log(compact(listCreatorLanes()));
+  if (cmd === "creator" && sub === "lane") return console.log(compact(getCreatorLane(a || "")));
+  if (cmd === "creator" && sub === "template") return console.log(compact(creatorLaneTemplate(a || "")));
   if (cmd === "creator" && sub === "install") return console.log(compact(await creatorCatalogInstall(a || "demo-sales-framework")));
   if (cmd === "creator" && sub === "search") return console.log(compact(await searchCreatorCatalog({ creatorId: a || "demo-sales-framework", query: b || "personalized plan" })));
   if (cmd === "creator" && sub === "recommend") return console.log(compact(await recommendCreatorCatalog({
@@ -647,6 +751,8 @@ async function main() {
   if (cmd === "creator" && sub === "onboarding") return console.log(compact(await creatorOnboardingInfo()));
   if (cmd === "creator" && sub === "preview") return console.log(compact(await previewCreatorOnboarding(readCreatorImportFile(a, { creatorId: b || "" }))));
   if (cmd === "creator" && sub === "publish") return console.log(compact(await publishCreatorOnboarding(readCreatorImportFile(a, { creatorId: b || "" }))));
+  if (cmd === "creator" && sub === "preview-lane") return console.log(compact(await previewCreatorOnboarding(readCreatorImportFile(b, { sourceLane: a || "", creatorId: c || "" }))));
+  if (cmd === "creator" && sub === "publish-lane") return console.log(compact(await publishCreatorOnboarding(readCreatorImportFile(b, { sourceLane: a || "", creatorId: c || "" }))));
   if (cmd === "endpoints" && sub === "list") return console.log(compact(await listEndpoints()));
   if (cmd === "endpoints" && sub === "info") return console.log(compact(await endpointInfo(a)));
   if (cmd === "endpoints" && sub === "create") return console.log(compact(await createEndpoint(readJsonFile(a))));

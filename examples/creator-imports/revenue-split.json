@@ -1,0 +1,28 @@
+{
+  "title": "Partner workshop catalog",
+  "summary": "Co-created workshop content with payout labels for paid actions.",
+  "items": [
+    {
+      "title": "Workshop replay summary",
+      "summary": "Subscriber-access replay summary for the co-created workshop.",
+      "itemType": "lesson",
+      "tags": ["revenue-split", "workshop", "subscriber"],
+      "entitlement": "subscriber",
+      "sourceRef": "revshare:workshop/replay-summary",
+      "approved": true
+    },
+    {
+      "title": "Partner implementation plan",
+      "summary": "Paid action that adapts the co-created framework to the subscriber's case.",
+      "itemType": "paid_tool",
+      "tags": ["revenue-split", "paid", "implementation"],
+      "entitlement": "paid",
+      "sourceRef": "revshare:paid/partner-plan",
+      "subscriberInputPrompt": "Send your situation, audience, offer, and desired next action.",
+      "priceUsd": 5,
+      "paidActionSlug": "partner-implementation-plan",
+      "payoutLabel": "partner-workshop-50-50",
+      "approved": true
+    }
+  ]
+}

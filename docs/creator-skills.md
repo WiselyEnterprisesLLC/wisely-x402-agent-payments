@@ -60,7 +60,9 @@ Creators can import Markdown, CSV, JSON, or direct item arrays into a preview be
 
 ```bash
 wisely-x402 creator onboarding
+wisely-x402 creator lanes
 wisely-x402 creator preview ./my-course-outline.md my-course
+wisely-x402 creator preview-lane notion_export examples/creator-imports/notion-playbook.md my-course
 ```
 
 Preview is public-safe and does not persist content or create endpoints. Publish requires a saved `X-Builder-Key` or operator admin token:
@@ -71,12 +73,38 @@ wisely-x402 creator publish ./my-course-outline.md my-course
 
 Publishing creates or updates the creator catalog. If paid actions are included, Wisely can create matching `/tools/{slug}` paid endpoints so subscriber agents can probe for HTTP 402, ask the user, pay, invoke, and save receipts.
 
-For video, PDF, Notion, Kajabi, Teachable, Discord, and membership/community sources, start with approved exports, transcripts, public links, or pasted text. The wizard does not ask for platform passwords, Discord tokens, raw API keys, or admin credentials.
+For video, PDF, Notion, Kajabi, Teachable, Skool, Discord, memberships, teams, affiliate offers, revenue splits, token-gated content, and marketplace sources, start with approved exports, transcripts, public links, CSV/JSON, or pasted text. The wizard does not ask for platform passwords, Discord tokens, raw API keys, admin credentials, wallet recovery data, raw cards, or private member/student data.
 
-Use the files in `examples/creator-imports/` as starter exports for Skool/community, Kajabi, Teachable, Notion, and Discord/community sources. Every template uses the same normalized fields:
+Use the files in `examples/creator-imports/` as starter exports. `creator-lanes.json` is the canonical lane registry. Every template uses the same normalized fields:
 
 ```text
 title, summary, itemType, tags, entitlement, sourceRef, subscriberInputPrompt, priceUsd, paidActionSlug, approved
+```
+
+## Creator Import Lanes
+
+| Lane | Best input | Default entitlement | CLI |
+| --- | --- | --- | --- |
+| Markdown outline | Pasted framework, outline, checklist, approved lesson summaries | free | `wisely-x402 creator preview-lane markdown_outline <file> <creatorId>` |
+| Video transcript | Transcript, timestamps, lesson notes | subscriber | `wisely-x402 creator preview-lane video_transcript <file> <creatorId>` |
+| PDF/workbook text | Extracted PDF text, workbook sections, slide notes | subscriber | `wisely-x402 creator preview-lane pdf_text <file> <creatorId>` |
+| Notion export | Markdown/CSV export or approved page text | subscriber | `wisely-x402 creator preview-lane notion_export <file> <creatorId>` |
+| Kajabi export | Offer/module CSV, lesson inventory, transcript summaries | subscriber | `wisely-x402 creator preview-lane kajabi_export <file> <creatorId>` |
+| Teachable export | Course section/lecture CSV, resources | subscriber | `wisely-x402 creator preview-lane teachable_export <file> <creatorId>` |
+| Skool/community | Classroom modules, curated FAQ, public classroom links | subscriber | `wisely-x402 creator preview-lane skool_community <file> <creatorId>` |
+| Discord/community FAQ | Moderator-approved FAQ or public channel summary | free | `wisely-x402 creator preview-lane discord_community <file> <creatorId>` |
+| Membership library | Library inventory, tier labels, approved resources | subscriber | `wisely-x402 creator preview-lane membership_export <file> <creatorId>` |
+| Teams/cohort training | SOP summaries, training outline, role checklists | subscriber | `wisely-x402 creator preview-lane teams_training <file> <creatorId>` |
+| Affiliate/partner offer | Approved offer rows, disclosure text, affiliate links | free | `wisely-x402 creator preview-lane affiliate_offer <file> <creatorId>` |
+| Revenue split | Co-creator catalog JSON and payout labels | paid | `wisely-x402 creator preview-lane revenue_split <file> <creatorId>` |
+| Token-gated content | Public token gate rule and unlock description | subscriber | `wisely-x402 creator preview-lane token_gated_content <file> <creatorId>` |
+| Marketplace listing | Public service/product rows, pricing table, docs links | free | `wisely-x402 creator preview-lane marketplace_listing <file> <creatorId>` |
+
+To inspect a sample before uploading:
+
+```bash
+wisely-x402 creator template discord_community
+wisely-x402 creator lane kajabi_export
 ```
 
 Minimal Markdown import:

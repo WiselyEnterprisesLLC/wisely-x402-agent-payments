@@ -1,0 +1,4 @@
+title,summary,itemType,tags,entitlement,sourceRef,subscriberInputPrompt,priceUsd,paidActionSlug,approved
+Sales handoff SOP,Internal training lesson for clean sales-to-ops handoff,lesson,"teams;sop;handoff",subscriber,teams:sop/sales-handoff,,0,,true
+Support escalation checklist,Checklist for deciding when a customer issue needs escalation,checklist,"teams;support;checklist",subscriber,teams:sop/support-escalation,,0,,true
+Run a roleplay drill,Paid action that roleplays the SOP with the learner and scores the response,paid_tool,"teams;paid;roleplay",paid,teams:paid/roleplay,"Send role, scenario, and desired difficulty.",4,teams-roleplay-drill,true

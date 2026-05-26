@@ -1,0 +1,4 @@
+title,summary,itemType,tags,entitlement,sourceRef,subscriberInputPrompt,priceUsd,paidActionSlug,approved
+Recommended CRM stack,Approved affiliate resource for choosing a simple CRM stack,resource,"affiliate;crm;disclosure",free,affiliate:crm-stack,,0,,true
+Disclosure and fit rules,Required disclosure and when not to recommend the affiliate offer,checklist,"affiliate;disclosure;rules",free,affiliate:rules/disclosure,,0,,true
+Tool fit check,Paid action that decides whether the affiliate offer fits the subscriber's use case,paid_tool,"affiliate;paid;fit-check",paid,affiliate:paid/fit-check,"Send current workflow, budget, and team size.",1,affiliate-tool-fit-check,true
