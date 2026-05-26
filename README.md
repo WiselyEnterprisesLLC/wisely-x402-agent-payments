@@ -9,7 +9,7 @@ This repository is the public integration surface: docs, schemas, examples, CLI 
 ## Start Here
 
 ```bash
-npm install -g github:WiselyEnterprisesLLC/wisely-x402-agent-payments#v2.1.3
+npm install -g github:WiselyEnterprisesLLC/wisely-x402-agent-payments#v2.1.4
 wisely-x402 doctor
 wisely-x402 rails status
 ```
@@ -46,6 +46,7 @@ Useful public URLs:
 - Developer credits for repeat approved calls without prompting for every tiny signature.
 - Conversion quote handoff when a buyer starts with one supported crypto asset and the seller requires another.
 - Receipts, logs, proof cache, and reconciliation status.
+- Public paid report endpoints, including a $0.05 `/paid/chan-state-report` that returns a current /pol/ + /biz/ board-intelligence report with streaming progress, receipts, and anti-amplification safety boundaries.
 
 ## Settlement Rails
 
@@ -103,6 +104,18 @@ Safety boundary: these lanes use exports, transcripts, pasted text, public links
 Public proof page:
 
 https://wiselyenterprisesllc.com/creator-import-proof/
+
+## Paid Report Example
+
+Current /pol/ + /biz/ board report:
+
+```bash
+curl -i https://payments.wiselyenterprisesllc.com/paid/chan-state-report
+```
+
+The no-payment call returns HTTP `402` with x402 payment requirements. After the caller signs and retries, the endpoint returns a long Markdown report. Use `?stream=1` or `Accept: text/event-stream` when an agent should stream plain-English progress before the final report event.
+
+The report is frank about public extremist, obscene, hateful, conspiratorial, and market-hype content, but does not reproduce targeted abuse, doxxing, slurs, or calls for violence. It is intended as narrative/market intelligence, not endorsement.
 
 ## Public Package Boundaries
 
