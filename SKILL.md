@@ -1,6 +1,6 @@
 ---
 name: x402-agent-payment-infrastructure
-version: 2.1.5
+version: 2.1.6
 title: Wisely x402 Agent-Payment Infrastructure
 description: "Self-facilitated x402 payment infrastructure for AI agents: quote, pay, invoke, stream progress, receive receipts, create hosted paid endpoints, and route across Base, Solana, XRPL, and Stellar without exposing keys."
 author: Wisely Enterprises LLC
@@ -48,6 +48,7 @@ It lets an agent:
 - stream plain-English progress for slow calls
 - save receipts, payment proof, and result proof
 - create and manage paid endpoints with a scoped builder key
+- guide local browser bridge setup for DoorDash-style merchant carts while keeping user logins local
 - call paid report endpoints such as `/paid/chan-state-report` for current board-intelligence reports
 
 ## Creator Import Lanes
@@ -113,6 +114,7 @@ Choose the simplest path that works for the installing agent.
 | User wants repeat calls without signing each time | Buy developer credits once, save the developer key in a secure secret store, then call with `X-Developer-Key`. |
 | User sees a new external x402 paywall | Probe/quote through `/x402/quote`, then let the user's wallet sign. |
 | User connects from ChatGPT without a wallet inside ChatGPT | Call `connect_wallet` or `x402_wallet_handoff`, show the hosted signing URL, explain the wallet-app/extension/WalletConnect choices, then poll `x402_payment_session_status`. |
+| User wants DoorDash/local merchant cart help | Call `wisely_local_commerce_bridge_setup`. The user installs/runs the localhost bridge, logs into DoorDash in their own browser, and the agent uses local tools for cart summary while Wisely handles crypto/gift-card/x402 quote and receipts. |
 
 ## User-Facing State Machine
 
@@ -183,13 +185,14 @@ First, run a doctor/check against the public manifest and rail status. When I as
 ## CLI Quickstart
 
 ```bash
-npm install -g github:WiselyEnterprisesLLC/wisely-x402-agent-payments#v2.1.5
+npm install -g github:WiselyEnterprisesLLC/wisely-x402-agent-payments#v2.1.6
 wisely-x402 doctor
 wisely-x402 rails status
 wisely-x402 proofs cache
 wisely-x402 mcp tools
 wisely-x402 quote serp-google-search SOL solana 0.10
 wisely-x402 wallet handoff openai-chat-completions
+wisely-x402 local-bridge setup
 ```
 
 If the user gives you a builder key, do not leave it in chat logs. Use:
@@ -220,6 +223,43 @@ Use MCP for agent-native flows:
 - builder revenue/events
 - endpoint handoff
 - receipt/proof lookup
+- local commerce/browser bridge setup through `wisely_local_commerce_bridge_setup`
+
+## Local Commerce Browser Bridge
+
+Use this when a user wants their agent to build DoorDash or merchant carts from the user's own account/session.
+
+First, call the MCP tool:
+
+```text
+wisely_local_commerce_bridge_setup
+```
+
+Then explain the setup in plain English:
+
+1. Install the local package once.
+2. Start the bridge with `wisely-x402 local-bridge start`.
+3. Add the local MCP URL `http://127.0.0.1:4027/mcp` to the same agent.
+4. Open DoorDash through the local bridge.
+5. The user logs into DoorDash directly in the browser window. Do not ask them to paste a password into chat.
+6. Use local tools to open the store, empty stale cart, add items, and read checkout total/ETA.
+7. Use remote Wisely MCP for gift-card, crypto conversion, x402 quote, wallet handoff, and receipts.
+8. Stop before any payment, gift-card purchase, redemption, or Place Order until the user explicitly approves.
+
+Local bridge commands:
+
+```bash
+wisely-x402 local-bridge setup
+wisely-x402 local-bridge start
+wisely-x402 local-bridge test
+```
+
+If Playwright is missing, install the browser runtime locally:
+
+```bash
+npm install -g playwright
+npx playwright install chromium
+```
 
 ## Hosted Endpoint Builder Flow
 

@@ -3,7 +3,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const rootBaseUrl = (
   process.env.WISELY_BASE_URL ||
@@ -174,6 +174,11 @@ export async function getManifest() {
 
 export async function getInstallProfile() {
   return requestJson("GET", `${aiBaseUrl}/install-profile`);
+}
+
+export async function getLocalBridgeSetup({ platform = "auto", localPort = 4027 } = {}) {
+  const qs = new URLSearchParams({ platform, port: String(localPort) });
+  return requestJson("GET", `${aiBaseUrl}/local-commerce-bridge/setup?${qs.toString()}`);
 }
 
 export async function getRailStatus() {
@@ -586,6 +591,9 @@ Payments and invoke:
   node client.mjs commerce gift-card-intent quote.json
   node client.mjs commerce gift-card-status <intentId>
   node client.mjs commerce bitrefill-search [query] [country]
+  node client.mjs local-bridge setup [platform] [port]
+  node client.mjs local-bridge start [port]
+  node client.mjs local-bridge test [port]
   node client.mjs x402-quote <asset> <network> <amountUsd>
   node client.mjs invoke preview <serviceId>
   node client.mjs invoke stream <serviceId>
@@ -664,6 +672,35 @@ async function main() {
   if (cmd === "services") return console.log(compact(await listServices()));
   if (cmd === "mcp" && sub === "tools") return console.log(compact(await mcpTools()));
   if (cmd === "mcp" && sub === "call") return console.log(compact(await callMcpTool(a, b ? readJsonFile(b) : {})));
+  if (cmd === "local-bridge" && sub === "setup") return console.log(compact(await getLocalBridgeSetup({ platform: a || process.platform, localPort: Number(b || 4027) })));
+  if (cmd === "local-bridge" && sub === "start") {
+    const bridgePath = path.join(packageRoot, "scripts", "local-commerce-bridge.mjs");
+    const mod = await import(pathToFileURL(bridgePath).href);
+    return mod.startBridge({ port: Number(a || 4027) });
+  }
+  if (cmd === "local-bridge" && sub === "test") {
+    const port = Number(a || 4027);
+    try {
+      const health = await fetch(`http://127.0.0.1:${port}/health`).then((res) => res.json());
+      const tools = await fetch(`http://127.0.0.1:${port}/mcp`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list", params: {} }),
+      }).then((res) => res.json());
+      return console.log(compact({ ok: true, health, tools }));
+    } catch (error) {
+      return console.log(compact({
+        ok: false,
+        error: "local_bridge_not_reachable",
+        detail: error instanceof Error ? error.message : String(error),
+        nextSteps: [
+          "Run: wisely-x402 local-bridge setup",
+          "Run: wisely-x402 local-bridge start",
+          `Then connect your agent to http://127.0.0.1:${port}/mcp`,
+        ],
+      }));
+    }
+  }
   if (cmd === "rails" && sub === "status") return console.log(compact(await getRailStatus()));
   if (cmd === "rails" && sub === "readiness") return console.log(compact(await getRailReadiness(a || "base")));
   if (cmd === "proofs" && sub === "cache") return console.log(compact(await getProofCache()));

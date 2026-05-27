@@ -11,7 +11,7 @@ This repository is the public integration surface: docs, schemas, examples, CLI 
 ## Start Here
 
 ```bash
-npm install -g github:WiselyEnterprisesLLC/wisely-x402-agent-payments#v2.1.5
+npm install -g github:WiselyEnterprisesLLC/wisely-x402-agent-payments#v2.1.6
 wisely-x402 doctor
 wisely-x402 rails status
 ```
@@ -46,6 +46,7 @@ Useful public URLs:
 - Hosted paid endpoints for builders who want to sell one tool call at a time.
 - External x402 seller quote/handoff for standard HTTP 402 resources.
 - Hosted wallet signing sessions for ChatGPT/MCP clients that need a user-friendly payment link with mobile wallet deep links, desktop injected-wallet selection, and optional WalletConnect.
+- Local commerce/browser bridge setup for DoorDash-style user-owned merchant sessions, while Wisely handles x402, gift-card, crypto quote, and receipts remotely.
 - Developer credits for repeat approved calls without prompting for every tiny signature.
 - Conversion quote handoff when a buyer starts with one supported crypto asset and the seller requires another.
 - Receipts, logs, proof cache, and reconciliation status.
@@ -128,6 +129,48 @@ Public proof page:
 
 https://wiselyenterprisesllc.com/creator-import-proof/
 
+## Local Commerce Browser Bridge
+
+For DoorDash or similar merchant cart flows, the remote Wisely MCP server is not enough by itself because the cart has to run in the user's own browser/session.
+
+Use this setup:
+
+```bash
+wisely-x402 local-bridge setup
+wisely-x402 local-bridge start
+wisely-x402 local-bridge test
+```
+
+Then add a second local MCP server to the user's agent:
+
+```json
+{
+  "mcpServers": {
+    "wisely-x402": {
+      "type": "http",
+      "url": "https://payments.wiselyenterprisesllc.com/ai/mcp"
+    },
+    "wisely-local-commerce": {
+      "type": "http",
+      "url": "http://127.0.0.1:4027/mcp"
+    }
+  }
+}
+```
+
+What the agent should tell the user:
+
+```text
+I can use Wisely for payment quotes and receipts. For DoorDash, I need a local browser bridge so the cart runs on your computer. Start the bridge, log into DoorDash yourself in the browser window, and do not paste your password here. I will build the cart locally, show you the checkout total and ETA, then use Wisely for the gift-card/crypto/x402 quote. I will stop before any payment or Place Order.
+```
+
+If the bridge says Playwright is missing:
+
+```bash
+npm install -g playwright
+npx playwright install chromium
+```
+
 ## Paid Report Example
 
 Current /pol/ + /biz/ board report:
@@ -169,6 +212,7 @@ This repo intentionally excludes:
 - [MCP setup](docs/mcp-setup.md)
 - [Rails](docs/rails.md)
 - [Creator skills](docs/creator-skills.md)
+- [Local commerce bridge](docs/local-commerce-bridge.md)
 - [Receipts](docs/receipts.md)
 - [FAQ](docs/faq.md)
 
