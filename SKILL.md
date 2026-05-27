@@ -1,6 +1,6 @@
 ---
 name: x402-agent-payment-infrastructure
-version: 2.1.7
+version: 2.1.8
 title: Wisely x402 Agent-Payment Infrastructure
 description: "Self-facilitated x402 payment infrastructure for AI agents: quote, pay, invoke, stream progress, receive receipts, create hosted paid endpoints, and route across Base, Solana, XRPL, and Stellar without exposing keys."
 author: Wisely Enterprises LLC
@@ -114,7 +114,7 @@ Choose the simplest path that works for the installing agent.
 | User wants repeat calls without signing each time | Buy developer credits once, save the developer key in a secure secret store, then call with `X-Developer-Key`. |
 | User sees a new external x402 paywall | Probe/quote through `/x402/quote`, then let the user's wallet sign. |
 | User connects from ChatGPT without a wallet inside ChatGPT | Call `connect_wallet` or `x402_wallet_handoff`, show the hosted signing URL, explain the wallet-app/extension/WalletConnect choices, then poll `x402_payment_session_status`. |
-| User wants DoorDash/local merchant cart help | Call `wisely_local_commerce_bridge_setup`. The user installs/runs the localhost bridge, logs into DoorDash in their own browser, and the agent uses local tools for cart summary while Wisely handles crypto/gift-card/x402 quote and receipts. |
+| User wants DoorDash/local merchant cart help | Call `wisely_local_commerce_bridge_setup`. The user installs/runs the localhost bridge, logs into DoorDash in their own browser, and the agent uses local tools for cart summary while Wisely handles crypto/gift-card/x402 quote, wallet signing handoff, receipts, and local proof storage. |
 
 ## User-Facing State Machine
 
@@ -185,7 +185,7 @@ First, run a doctor/check against the public manifest and rail status. When I as
 ## CLI Quickstart
 
 ```bash
-npm install -g github:WiselyEnterprisesLLC/wisely-x402-agent-payments#v2.1.7
+npm install -g github:WiselyEnterprisesLLC/wisely-x402-agent-payments#v2.1.8
 wisely-x402 doctor
 wisely-x402 rails status
 wisely-x402 proofs cache
@@ -246,6 +246,7 @@ Then explain the setup in plain English:
 7. Use local tools to open the store, empty stale cart, add items, and read checkout total/ETA.
 8. Use remote Wisely MCP for gift-card, crypto conversion, x402 quote, wallet handoff, and receipts.
 9. Stop before any payment, gift-card purchase, redemption, or Place Order until the user explicitly approves.
+10. After signing or receiving a gift-card/order receipt, save it with `local_vault_save` or poll with `wallet_payment_session_status` so the user has a local copy.
 
 Local bridge commands:
 
@@ -262,6 +263,13 @@ If Playwright is missing, install the browser runtime locally:
 npm install -g playwright
 npx playwright install chromium
 ```
+
+Local wallet and receipt tools exposed by the same bridge:
+
+- `wallet_open_signing_url`: open a Wisely `/x402/payment/sessions/...` signing URL in the user's local browser.
+- `wallet_payment_session_status`: poll the signing session and save the signed payment/receipt status locally.
+- `local_vault_save`: save receipts, gift-card intents, and order records locally. Gift-card codes/PINs/links are redacted unless the user explicitly opts into sensitive local storage.
+- `local_vault_list`: show what has been saved locally without exposing sensitive fields.
 
 ## Hosted Endpoint Builder Flow
 

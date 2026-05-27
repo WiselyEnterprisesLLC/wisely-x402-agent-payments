@@ -11,7 +11,7 @@ This repository is the public integration surface: docs, schemas, examples, CLI 
 ## Start Here
 
 ```bash
-npm install -g github:WiselyEnterprisesLLC/wisely-x402-agent-payments#v2.1.7
+npm install -g github:WiselyEnterprisesLLC/wisely-x402-agent-payments#v2.1.8
 wisely-x402 doctor
 wisely-x402 rails status
 ```
@@ -162,8 +162,15 @@ Then add a second local MCP server to the user's agent:
 What the agent should tell the user:
 
 ```text
-I can use Wisely for payment quotes and receipts. For DoorDash, I need a local browser bridge so the cart runs on your computer. Start the bridge, log into DoorDash yourself in the browser window, and do not paste your password here. I will build the cart locally, show you the checkout total and ETA, then use Wisely for the gift-card/crypto/x402 quote. I will stop before any payment or Place Order.
+I can use Wisely for payment quotes and receipts. For DoorDash, I need a local browser bridge so the cart runs on your computer. Start the bridge, log into DoorDash yourself in the browser window, and do not paste your password here. I will build the cart locally, show you the checkout total and ETA, then use Wisely for the gift-card/crypto/x402 quote. If payment is approved, I will open the wallet signing link locally, then save the receipt or gift-card record to your local vault. I will stop before any payment or Place Order.
 ```
+
+The same local bridge also exposes wallet/proof tools:
+
+- `wallet_open_signing_url` opens a Wisely signing URL in the user's local wallet-capable browser.
+- `wallet_payment_session_status` polls the signed payment session and can save the proof locally.
+- `local_vault_save` saves receipts, gift-card intents, order records, and redemption records locally. Sensitive gift-card codes/PINs/claim links are redacted unless the user explicitly opts in.
+- `local_vault_list` lists locally saved records.
 
 If the bridge says Playwright is missing:
 

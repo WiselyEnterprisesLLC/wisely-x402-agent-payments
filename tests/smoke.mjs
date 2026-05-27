@@ -64,14 +64,14 @@ const urls = [
 
 const failures = [];
 for (const url of urls) {
-  const res = await fetch(url, { headers: { "user-agent": "wisely-x402-public-smoke/2.1.7" } });
+  const res = await fetch(url, { headers: { "user-agent": "wisely-x402-public-smoke/2.1.8" } });
   if (!res.ok) failures.push({ url, status: res.status });
   console.log(`${res.ok ? "ok" : "fail"} ${res.status} ${url}`);
 }
 
 const recommend = await fetch("https://payments.wiselyenterprisesllc.com/ai/creator-catalogs/demo-sales-framework/recommend", {
   method: "POST",
-  headers: { "content-type": "application/json", "user-agent": "wisely-x402-public-smoke/2.1.7" },
+  headers: { "content-type": "application/json", "user-agent": "wisely-x402-public-smoke/2.1.8" },
   body: JSON.stringify({
     situation: "I am testing the creator catalog flow and need a one-week buyer conversation plan.",
     goal: "pick the right free or paid creator action",
@@ -85,7 +85,7 @@ if (!recommend.ok || !recommendBody.includes("wisely.creator-catalog.recommend.v
 
 const preview = await fetch("https://payments.wiselyenterprisesllc.com/ai/creator-onboarding/preview", {
   method: "POST",
-  headers: { "content-type": "application/json", "user-agent": "wisely-x402-public-smoke/2.1.7" },
+  headers: { "content-type": "application/json", "user-agent": "wisely-x402-public-smoke/2.1.8" },
   body: JSON.stringify({
     creatorId: "smoke-preview",
     title: "Smoke Preview Creator",

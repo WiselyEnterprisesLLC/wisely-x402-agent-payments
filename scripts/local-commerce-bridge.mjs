@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 
 import http from "node:http";
+import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
 const DEFAULT_PORT = Number(process.env.WISELY_LOCAL_BRIDGE_PORT || 4027);
+const WISELY_ROOT = (process.env.WISELY_BASE_URL || "https://payments.wiselyenterprisesllc.com").replace(/\/$/, "");
 let browserContext = null;
 let page = null;
 
@@ -41,6 +43,36 @@ async function readBody(req) {
   for await (const chunk of req) chunks.push(chunk);
   const text = Buffer.concat(chunks).toString("utf8");
   return text ? JSON.parse(text) : {};
+}
+
+function vaultRoot() {
+  const root = process.env.WISELY_LOCAL_VAULT || path.join(os.homedir(), ".wisely-x402", "local-vault");
+  fs.mkdirSync(root, { recursive: true });
+  return root;
+}
+
+function safeId(value, fallback = "record") {
+  return String(value || fallback).toLowerCase().replace(/[^a-z0-9._-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80) || fallback;
+}
+
+function nowStamp() {
+  return new Date().toISOString().replace(/[:.]/g, "-");
+}
+
+function redactSensitive(value, allowSensitiveGiftCardStorage = false) {
+  if (Array.isArray(value)) return value.map((item) => redactSensitive(item, allowSensitiveGiftCardStorage));
+  if (!value || typeof value !== "object") return value;
+  const out = {};
+  for (const [key, raw] of Object.entries(value)) {
+    const sensitiveGiftCard = /(?:gift.?card|redemption|claim|voucher|pin|barcode|card.?number|serial|code|secret|url|link)/i.test(key);
+    const secret = /(?:password|cookie|token|private.?key|seed|mnemonic|cvv|card.?number|bearer|session)/i.test(key);
+    if (secret || (sensitiveGiftCard && !allowSensitiveGiftCardStorage)) {
+      out[key] = "[redacted-local-vault]";
+    } else {
+      out[key] = redactSensitive(raw, allowSensitiveGiftCardStorage);
+    }
+  }
+  return out;
 }
 
 async function ensurePage() {
@@ -242,6 +274,105 @@ async function checkoutSummary() {
   };
 }
 
+async function openWalletSigningUrl(args = {}) {
+  const p = await ensurePage();
+  const signingUrl = String(args.signingUrl || args.url || "").trim();
+  if (!signingUrl) return { ok: false, error: "missing_signing_url" };
+  let allowed;
+  try {
+    allowed = new URL(signingUrl);
+  } catch {
+    return { ok: false, error: "invalid_signing_url" };
+  }
+  const wiselyHost = new URL(WISELY_ROOT).host;
+  if (allowed.protocol !== "https:" || allowed.host !== wiselyHost || !allowed.pathname.startsWith("/x402/payment/sessions/")) {
+    return { ok: false, error: "unsupported_signing_url", note: `Only ${WISELY_ROOT}/x402/payment/sessions/... signing URLs are opened by this bridge.` };
+  }
+  await p.goto(signingUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
+  await p.waitForTimeout(1000);
+  return {
+    ok: true,
+    action: "wallet_open_signing_url",
+    url: p.url(),
+    title: await p.title().catch(() => ""),
+    instructions: [
+      "Connect your own wallet in this local browser window.",
+      "Do not paste seed phrases, private keys, or wallet passwords into chat.",
+      "After signing, the agent should call wallet_payment_session_status, then save the returned receipt/proof locally.",
+    ],
+  };
+}
+
+async function walletPaymentSessionStatus(args = {}) {
+  const sessionId = String(args.sessionId || args.id || "").trim();
+  if (!sessionId) return { ok: false, error: "missing_session_id" };
+  const includeSignedPayment = args.includeSignedPayment !== false;
+  const url = `${WISELY_ROOT}/x402/payment/sessions/${encodeURIComponent(sessionId)}/status${includeSignedPayment ? "?includeSignedPayment=true" : ""}`;
+  const response = await fetch(url, { headers: { accept: "application/json" } });
+  const text = await response.text();
+  let body;
+  try { body = text ? JSON.parse(text) : {}; } catch { body = { raw: text }; }
+  if (!response.ok) return { ok: false, status: response.status, body };
+  const shouldSave = Boolean(args.save !== false && (body?.body?.signedPayment || body?.signedPayment || body?.receipt || body?.status === "signed" || body?.status === "paid"));
+  let saved = null;
+  if (shouldSave) saved = saveLocalRecord({ type: "wallet-session", label: sessionId, record: body, source: url });
+  return { ok: true, action: "wallet_payment_session_status", status: response.status, body, saved };
+}
+
+function saveLocalRecord({ type = "record", label = "", record = {}, source = "", allowSensitiveGiftCardStorage = false } = {}) {
+  const recordType = safeId(type);
+  const id = safeId(label || record.receiptId || record.id || record.sessionId || record.intentId || nowStamp());
+  const dir = path.join(vaultRoot(), recordType);
+  fs.mkdirSync(dir, { recursive: true });
+  const payload = {
+    schema: "wisely.local-vault.record.v1",
+    savedAt: new Date().toISOString(),
+    type: recordType,
+    label: label || id,
+    source,
+    sensitiveStorage: allowSensitiveGiftCardStorage ? "explicitly_allowed_by_user" : "redacted",
+    record: redactSensitive(record, allowSensitiveGiftCardStorage),
+  };
+  const file = path.join(dir, `${nowStamp()}-${id}.json`);
+  fs.writeFileSync(file, JSON.stringify(payload, null, 2));
+  return { ok: true, action: "local_vault_save", file, type: recordType, sensitiveStorage: payload.sensitiveStorage };
+}
+
+async function localVaultSave(args = {}) {
+  const type = String(args.type || args.recordType || "record");
+  const label = String(args.label || args.receiptId || args.intentId || args.sessionId || "");
+  const record = args.record || args.receipt || args.giftCard || args.paymentSession || args;
+  const allowSensitiveGiftCardStorage = Boolean(args.allowSensitiveGiftCardStorage) && String(args.confirmSensitiveStorage || "").trim() === "SAVE_GIFT_CARD_SECRETS_LOCALLY";
+  const saved = saveLocalRecord({ type, label, record, source: String(args.source || ""), allowSensitiveGiftCardStorage });
+  return {
+    ...saved,
+    warning: allowSensitiveGiftCardStorage
+      ? "Sensitive gift-card material was saved locally because the user explicitly opted in. Protect this machine profile."
+      : "Sensitive-looking gift-card codes, PINs, links, wallet secrets, and tokens were redacted. Use explicit opt-in only if the user wants local storage of gift-card secrets.",
+  };
+}
+
+async function localVaultList(args = {}) {
+  const type = safeId(args.type || "");
+  const root = vaultRoot();
+  const dirs = type ? [path.join(root, type)] : fs.readdirSync(root, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => path.join(root, d.name));
+  const records = [];
+  for (const dir of dirs) {
+    if (!fs.existsSync(dir)) continue;
+    for (const name of fs.readdirSync(dir).filter((n) => n.endsWith(".json")).sort().slice(-Number(args.limit || 50))) {
+      const file = path.join(dir, name);
+      try {
+        const data = JSON.parse(fs.readFileSync(file, "utf8"));
+        records.push({ file, savedAt: data.savedAt, type: data.type, label: data.label, sensitiveStorage: data.sensitiveStorage });
+      } catch {
+        records.push({ file, error: "unreadable" });
+      }
+    }
+  }
+  records.sort((a, b) => String(b.savedAt || "").localeCompare(String(a.savedAt || "")));
+  return { ok: true, action: "local_vault_list", vaultRoot: root, count: records.length, records: records.slice(0, Number(args.limit || 50)) };
+}
+
 function tools() {
   return [
     { name: "local_browser_status", description: "Confirm the local browser bridge is running and report current URL/title.", inputSchema: { type: "object", additionalProperties: true } },
@@ -249,6 +380,10 @@ function tools() {
     { name: "doordash_empty_cart", description: "Clear stale DoorDash cart items in the local browser before a fresh quote.", inputSchema: { type: "object", additionalProperties: true } },
     { name: "doordash_add_items", description: "Add straightforward DoorDash items by visible item name. Stops on required options or ambiguity. Never clicks Place Order.", inputSchema: { type: "object", additionalProperties: true, properties: { items: { type: "array" }, item: { type: "string" } } } },
     { name: "doordash_checkout_summary", description: "Read total/ETA/tip/payment-ish checkout facts from the local DoorDash browser. Never places the order.", inputSchema: { type: "object", additionalProperties: true } },
+    { name: "wallet_open_signing_url", description: "Open a Wisely x402 payment-session signing URL in the user's local browser for injected wallet/mobile wallet signing. Never asks for keys.", inputSchema: { type: "object", additionalProperties: true, properties: { signingUrl: { type: "string" }, url: { type: "string" } } } },
+    { name: "wallet_payment_session_status", description: "Poll a Wisely wallet handoff session and optionally save the signed payment/receipt status to the local vault.", inputSchema: { type: "object", additionalProperties: true, properties: { sessionId: { type: "string" }, includeSignedPayment: { type: "boolean" }, save: { type: "boolean" } } } },
+    { name: "local_vault_save", description: "Save a receipt, wallet-session status, gift-card intent, or gift-card record to the user's local vault. Redacts gift-card codes/PINs/links unless explicitly opted in.", inputSchema: { type: "object", additionalProperties: true } },
+    { name: "local_vault_list", description: "List locally saved receipts, wallet sessions, gift-card intents, and gift-card records without exposing sensitive values.", inputSchema: { type: "object", additionalProperties: true, properties: { type: { type: "string" }, limit: { type: "number" } } } },
   ];
 }
 
@@ -258,6 +393,10 @@ async function callTool(name, args) {
   if (name === "doordash_empty_cart") return emptyDoorDashCart();
   if (name === "doordash_add_items") return addDoorDashItems(args);
   if (name === "doordash_checkout_summary") return checkoutSummary();
+  if (name === "wallet_open_signing_url") return openWalletSigningUrl(args);
+  if (name === "wallet_payment_session_status") return walletPaymentSessionStatus(args);
+  if (name === "local_vault_save") return localVaultSave(args);
+  if (name === "local_vault_list") return localVaultList(args);
   return { ok: false, error: `unknown_tool:${name}` };
 }
 
@@ -290,7 +429,7 @@ export async function startBridge({ port = DEFAULT_PORT } = {}) {
       if (req.url !== "/mcp") return json(res, 404, { ok: false, error: "not_found", mcp: "/mcp" });
       if (req.method === "GET") return json(res, 200, { ok: true, name: "wisely-local-commerce-bridge", tools: tools() });
       const rpc = await readBody(req);
-      if (rpc.method === "initialize") return json(res, 200, { jsonrpc: "2.0", id: rpc.id ?? null, result: { protocolVersion: "2025-06-18", capabilities: { tools: {} }, serverInfo: { name: "wisely-local-commerce-bridge", version: "0.1.0" } } });
+      if (rpc.method === "initialize") return json(res, 200, { jsonrpc: "2.0", id: rpc.id ?? null, result: { protocolVersion: "2025-06-18", capabilities: { tools: {} }, serverInfo: { name: "wisely-local-commerce-bridge", version: "0.2.0" } } });
       if (rpc.method === "tools/list") return json(res, 200, { jsonrpc: "2.0", id: rpc.id ?? null, result: { tools: tools() } });
       if (rpc.method === "tools/call") return json(res, 200, rpcResult(rpc.id, await callTool(String(rpc.params?.name || ""), rpc.params?.arguments || {})));
       if (rpc.method === "ping") return json(res, 200, { jsonrpc: "2.0", id: rpc.id ?? null, result: {} });
