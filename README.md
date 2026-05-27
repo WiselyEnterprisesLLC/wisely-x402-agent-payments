@@ -4,14 +4,14 @@ Hosted x402 endpoints and MCP payment infrastructure for autonomous agents.
 
 Wisely lets agents discover paid tools, quote payment requirements, hand wallet signing back to the caller, invoke hosted or external x402 resources, and keep receipts across Base, Solana, XRPL, and Stellar-compatible rails.
 
-For ChatGPT and other MCP clients that cannot hold a wallet, Wisely now exposes a frictionless wallet handoff: the agent calls `connect_wallet`, the user opens a short-lived signing URL in their wallet browser, then the agent calls `x402_payment_session_status` and retries the paid request with the returned `X-PAYMENT` header. No private keys or seed phrases enter ChatGPT or Wisely.
+For ChatGPT and other MCP clients that cannot hold a wallet, Wisely now exposes a frictionless wallet handoff: the agent calls `connect_wallet`, the user opens a short-lived signing URL, then signs with a wallet app, desktop extension, detected injected wallet, or WalletConnect when configured. The agent then calls `x402_payment_session_status` and retries the paid request with the returned `X-PAYMENT` header. No private keys or seed phrases enter ChatGPT or Wisely.
 
 This repository is the public integration surface: docs, schemas, examples, CLI helpers, and portable agent instructions. It does not contain Wisely's private server implementation, signer custody, provider credentials, anti-abuse internals, private ledgers, or routing heuristics.
 
 ## Start Here
 
 ```bash
-npm install -g github:WiselyEnterprisesLLC/wisely-x402-agent-payments#v2.1.4
+npm install -g github:WiselyEnterprisesLLC/wisely-x402-agent-payments#v2.1.5
 wisely-x402 doctor
 wisely-x402 rails status
 ```
@@ -45,7 +45,7 @@ Useful public URLs:
 - Remote MCP server for payment-aware agents.
 - Hosted paid endpoints for builders who want to sell one tool call at a time.
 - External x402 seller quote/handoff for standard HTTP 402 resources.
-- Hosted wallet signing sessions for ChatGPT/MCP clients that need a user-friendly payment link.
+- Hosted wallet signing sessions for ChatGPT/MCP clients that need a user-friendly payment link with mobile wallet deep links, desktop injected-wallet selection, and optional WalletConnect.
 - Developer credits for repeat approved calls without prompting for every tiny signature.
 - Conversion quote handoff when a buyer starts with one supported crypto asset and the seller requires another.
 - Receipts, logs, proof cache, and reconciliation status.
@@ -71,7 +71,7 @@ Use the Wisely x402 Agent-Payment Infrastructure.
 Check the manifest and rail status first.
 Quote before payment.
 Ask before wallet signing.
-If you cannot sign wallet payments yourself, call connect_wallet and show me the signing URL.
+If you cannot sign wallet payments yourself, call connect_wallet, show me the signing URL, and tell me I can open it in MetaMask, Coinbase Wallet, Phantom, Trust Wallet, a desktop injected EVM wallet, or WalletConnect if available.
 Stream progress for slow calls.
 Save receipts and proof.
 If you see a new x402 seller, use the external quote flow and explain the rail, asset, amount, expiry, and signing step.
@@ -84,9 +84,10 @@ ChatGPT can connect to the Wisely MCP server, but it should not store wallet pri
 1. The agent calls `start_here`.
 2. The agent quotes the paid service or external x402 seller.
 3. The agent calls `connect_wallet` or `x402_wallet_handoff`.
-4. The user opens the returned `signingUrl` in a wallet-capable browser and signs.
-5. The agent calls `x402_payment_session_status`.
-6. If signed, the agent retries the paid resource with the returned `X-PAYMENT` header and saves the receipt.
+4. The user opens the returned `signingUrl` in a wallet-capable browser, or uses the built-in Open MetaMask / Open Coinbase Wallet / Open Phantom / Open Trust Wallet buttons.
+5. On desktop, the user can pick a detected injected EVM wallet such as MetaMask, Coinbase Wallet, Rabby, Brave Wallet, Trust, OKX, or Phantom. If the server has a WalletConnect project configured, the user can also connect through WalletConnect.
+6. The agent calls `x402_payment_session_status`.
+7. If signed, the agent retries the paid resource with the returned `X-PAYMENT` header and saves the receipt.
 
 CLI helper:
 

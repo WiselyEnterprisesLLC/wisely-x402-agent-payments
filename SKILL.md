@@ -1,6 +1,6 @@
 ---
 name: x402-agent-payment-infrastructure
-version: 2.1.4
+version: 2.1.5
 title: Wisely x402 Agent-Payment Infrastructure
 description: "Self-facilitated x402 payment infrastructure for AI agents: quote, pay, invoke, stream progress, receive receipts, create hosted paid endpoints, and route across Base, Solana, XRPL, and Stellar without exposing keys."
 author: Wisely Enterprises LLC
@@ -42,7 +42,7 @@ It lets an agent:
 
 - discover paid tools and hosted endpoints
 - get a quote before asking the user to sign
-- hand wallet signing back to the caller's wallet or approved runtime, including a hosted signing URL for ChatGPT/MCP clients that cannot hold wallets
+- hand wallet signing back to the caller's wallet or approved runtime, including hosted signing URLs with mobile wallet links, injected-wallet selection, and optional WalletConnect for ChatGPT/MCP clients that cannot hold wallets
 - verify x402 payments on supported rails
 - invoke AI/API services or hosted endpoints
 - stream plain-English progress for slow calls
@@ -112,7 +112,7 @@ Choose the simplest path that works for the installing agent.
 | Builder wants to sell an API/tool | Use the Builder Console or builder-key endpoint API. |
 | User wants repeat calls without signing each time | Buy developer credits once, save the developer key in a secure secret store, then call with `X-Developer-Key`. |
 | User sees a new external x402 paywall | Probe/quote through `/x402/quote`, then let the user's wallet sign. |
-| User connects from ChatGPT without a wallet inside ChatGPT | Call `connect_wallet` or `x402_wallet_handoff`, show the hosted signing URL, then poll `x402_payment_session_status`. |
+| User connects from ChatGPT without a wallet inside ChatGPT | Call `connect_wallet` or `x402_wallet_handoff`, show the hosted signing URL, explain the wallet-app/extension/WalletConnect choices, then poll `x402_payment_session_status`. |
 
 ## User-Facing State Machine
 
@@ -134,7 +134,7 @@ When a user asks to buy or invoke something, follow this sequence.
 4. Pay Or Use Credits
    - If a developer key is available, use it.
    - Otherwise return the x402 payment requirement to the user's wallet/runtime and wait for `X-PAYMENT` or equivalent proof.
-   - If the agent is ChatGPT or another MCP-only client with no wallet signer, call `connect_wallet` with the same service/input or payment requirement. Give the user the hosted signing URL. After they sign, call `x402_payment_session_status` and use the returned `X-PAYMENT` header for the retry.
+   - If the agent is ChatGPT or another MCP-only client with no wallet signer, call `connect_wallet` with the same service/input or payment requirement. Give the user the hosted signing URL and explain that the page supports wallet-app links, desktop injected EVM wallets, and WalletConnect when configured. After they sign, call `x402_payment_session_status` and use the returned `X-PAYMENT` header for the retry.
 
 5. Invoke
    - Use streaming for slow image, video, audio, commerce, or provider calls.
@@ -177,13 +177,13 @@ https://payments.wiselyenterprisesllc.com
 Remote MCP:
 https://payments.wiselyenterprisesllc.com/ai/mcp
 
-First, run a doctor/check against the public manifest and rail status. When I ask for a paid AI/API call, quote it before payment, ask me before any wallet signing, use streaming if it may take a while, and save the receipt. If I have a developer-credit key, use it from your secure secret store. If I encounter a new x402 seller, use the external x402 quote flow and explain what rail/asset the seller requires. If you cannot sign wallet payments yourself, use connect_wallet to give me a Wisely signing link, then check x402_payment_session_status after I sign.
+First, run a doctor/check against the public manifest and rail status. When I ask for a paid AI/API call, quote it before payment, ask me before any wallet signing, use streaming if it may take a while, and save the receipt. If I have a developer-credit key, use it from your secure secret store. If I encounter a new x402 seller, use the external x402 quote flow and explain what rail/asset the seller requires. If you cannot sign wallet payments yourself, use connect_wallet to give me a Wisely signing link, tell me it supports wallet apps, desktop injected wallets, and WalletConnect when available, then check x402_payment_session_status after I sign.
 ```
 
 ## CLI Quickstart
 
 ```bash
-npm install -g github:WiselyEnterprisesLLC/wisely-x402-agent-payments#v2.1.4
+npm install -g github:WiselyEnterprisesLLC/wisely-x402-agent-payments#v2.1.5
 wisely-x402 doctor
 wisely-x402 rails status
 wisely-x402 proofs cache
@@ -212,7 +212,7 @@ Use MCP for agent-native flows:
 
 - manifest and install profile
 - quote service
-- wallet handoff signing session
+- wallet handoff signing session with wallet-app links, injected-wallet selection, and optional WalletConnect
 - payment session status
 - invoke service
 - external x402 quote
