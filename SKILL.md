@@ -1,6 +1,6 @@
 ---
 name: x402-agent-payment-infrastructure
-version: 2.1.6
+version: 2.1.7
 title: Wisely x402 Agent-Payment Infrastructure
 description: "Self-facilitated x402 payment infrastructure for AI agents: quote, pay, invoke, stream progress, receive receipts, create hosted paid endpoints, and route across Base, Solana, XRPL, and Stellar without exposing keys."
 author: Wisely Enterprises LLC
@@ -185,7 +185,7 @@ First, run a doctor/check against the public manifest and rail status. When I as
 ## CLI Quickstart
 
 ```bash
-npm install -g github:WiselyEnterprisesLLC/wisely-x402-agent-payments#v2.1.6
+npm install -g github:WiselyEnterprisesLLC/wisely-x402-agent-payments#v2.1.7
 wisely-x402 doctor
 wisely-x402 rails status
 wisely-x402 proofs cache
@@ -238,18 +238,20 @@ wisely_local_commerce_bridge_setup
 Then explain the setup in plain English:
 
 1. Install the local package once.
-2. Start the bridge with `wisely-x402 local-bridge start`.
-3. Add the local MCP URL `http://127.0.0.1:4027/mcp` to the same agent.
-4. Open DoorDash through the local bridge.
-5. The user logs into DoorDash directly in the browser window. Do not ask them to paste a password into chat.
-6. Use local tools to open the store, empty stale cart, add items, and read checkout total/ETA.
-7. Use remote Wisely MCP for gift-card, crypto conversion, x402 quote, wallet handoff, and receipts.
-8. Stop before any payment, gift-card purchase, redemption, or Place Order until the user explicitly approves.
+2. Install the local browser runtime if prompted: `npx playwright install chromium`.
+3. Start the bridge with `wisely-x402 local-bridge start`.
+4. Add the local MCP URL `http://127.0.0.1:4027/mcp` to the same agent.
+5. Open DoorDash through the local bridge.
+6. The user logs into DoorDash directly in the browser window. Do not ask them to paste a password into chat.
+7. Use local tools to open the store, empty stale cart, add items, and read checkout total/ETA.
+8. Use remote Wisely MCP for gift-card, crypto conversion, x402 quote, wallet handoff, and receipts.
+9. Stop before any payment, gift-card purchase, redemption, or Place Order until the user explicitly approves.
 
 Local bridge commands:
 
 ```bash
 wisely-x402 local-bridge setup
+npx playwright install chromium
 wisely-x402 local-bridge start
 wisely-x402 local-bridge test
 ```

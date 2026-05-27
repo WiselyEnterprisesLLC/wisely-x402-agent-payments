@@ -11,7 +11,7 @@ This repository is the public integration surface: docs, schemas, examples, CLI 
 ## Start Here
 
 ```bash
-npm install -g github:WiselyEnterprisesLLC/wisely-x402-agent-payments#v2.1.6
+npm install -g github:WiselyEnterprisesLLC/wisely-x402-agent-payments#v2.1.7
 wisely-x402 doctor
 wisely-x402 rails status
 ```
@@ -137,6 +137,7 @@ Use this setup:
 
 ```bash
 wisely-x402 local-bridge setup
+npx playwright install chromium
 wisely-x402 local-bridge start
 wisely-x402 local-bridge test
 ```
