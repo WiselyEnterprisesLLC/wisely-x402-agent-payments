@@ -277,6 +277,20 @@ export async function callMcpTool(name, args = {}) {
   });
 }
 
+export async function createWalletHandoff(body = {}) {
+  return requestJson("POST", `${rootBaseUrl}/x402/payment/sessions`, body);
+}
+
+export async function createWalletHandoffViaMcp(body = {}) {
+  return callMcpTool("connect_wallet", body);
+}
+
+export async function getPaymentSessionStatus(sessionId, { includeSignedPayment = true } = {}) {
+  const params = new URLSearchParams();
+  if (includeSignedPayment) params.set("includeSignedPayment", "1");
+  return requestJson("GET", `${rootBaseUrl}/x402/payment/sessions/${encodeURIComponent(sessionId)}/status${params.toString() ? `?${params.toString()}` : ""}`);
+}
+
 export async function quoteCryptoAiService({ serviceId, fromAsset, fromNetwork, amountUsd, userVenue = "" }) {
   return requestJson("POST", `${aiBaseUrl}/quote`, { serviceId, fromAsset, fromNetwork, amountUsd, userVenue });
 }
@@ -561,6 +575,8 @@ Payments and invoke:
   node client.mjs conversion-quote <serviceId> <asset> <network>
   node client.mjs quote-matrix <asset> <network> <amountUsd>
   node client.mjs external-quote <asset> <network> <amountUsd> [sellerUrl] [GET|POST] [sellerBodyJsonFile]
+  node client.mjs wallet handoff [serviceId] [inputJsonFile]
+  node client.mjs wallet status <sessionId>
   node client.mjs commerce rye
   node client.mjs commerce rye-build <productUrl> [asset] [network] [buyerJsonFile]
   node client.mjs commerce gift-card
@@ -657,6 +673,11 @@ async function main() {
   if (cmd === "conversion" && sub === "assets") return console.log(compact(await getConversionAssets()));
   if (cmd === "conversion" && sub === "routes") return console.log(compact(await getConversionRoutesStatus()));
   if (cmd === "quote") return console.log(compact(await quoteCryptoAiService({ serviceId: sub || "serp-google-search", fromAsset: a || "SOL", fromNetwork: b || "solana", amountUsd: Number(c || 0.1) })));
+  if (cmd === "wallet" && sub === "handoff") {
+    const input = b ? readJsonFile(b) : { messages: [{ role: "user", content: "Hello from Wisely wallet handoff." }] };
+    return console.log(compact(await createWalletHandoff({ serviceId: a || "openai-chat-completions", input })));
+  }
+  if (cmd === "wallet" && sub === "status") return console.log(compact(await getPaymentSessionStatus(a || "", { includeSignedPayment: true })));
   if (cmd === "conversion-quote") return console.log(compact(await quoteConversionToSettlement({
     serviceId: sub || "seedream-image-generation",
     fromAsset: a || "SOL",
@@ -782,6 +803,9 @@ async function main() {
 export const quoteAceService = quoteCryptoAiService;
 export const quoteX402Conversion = quoteConversionToSettlement;
 export const quoteX402Seller = quoteExternalX402Seller;
+export const connectWallet = createWalletHandoff;
+export const walletHandoff = createWalletHandoff;
+export const paymentSessionStatus = getPaymentSessionStatus;
 export const getX402CommerceRyeHandoff = getRyeCommerceHandoff;
 export const buildX402CommerceRyeQuoteRequest = buildRyeCommerceQuoteRequest;
 export const invokeAceService = invokeCryptoAiService;
